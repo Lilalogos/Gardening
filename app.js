@@ -5,11 +5,11 @@ const TYPE_COLOR = { posts: "#e0a458", concepts: "#5fb3a5", persons: "#c4708a" }
 const TYPE_LABEL = { posts: "пост", concepts: "концепт", persons: "персона" };
 const TYPE_BASE_R = { posts: 2.2, concepts: 5, persons: 4 };
 
-let graph = null;       // {nodes:[{id,type,title,date,deg,x,y}], edges:[{source,target}]}
-let notes = null;       // id -> note detail
+let graph = null;
+let notes = null;
 let nodeById = new Map();
-let neighbors = new Map(); // id -> Set(neighbor ids)
-let linkObjs = [];       // resolved d3 link objects {source:nodeObj, target:nodeObj}
+let neighbors = new Map();
+let linkObjs = [];
 
 let canvas, ctx, dpr = 1;
 let width = 0, height = 0;
@@ -26,7 +26,7 @@ let state = {
   ambientBright: false,
 };
 
-let pathByType = {}; // Path2D per type (visible nodes only), rebuilt on filter/layout change
+let pathByType = {};
 let dirty = true;
 
 // ---------------- boot / data loading ----------------
@@ -189,7 +189,6 @@ function draw() {
   const bounds = viewportBounds();
   const pad = 60 / transform.k;
 
-  // ambient edges (batched, culled)
   const ambientAlpha = state.ambientBright ? 0.10 : 0.028;
   ctx.lineWidth = 1 / transform.k;
   ctx.strokeStyle = `rgba(122,138,148,${ambientAlpha})`;
@@ -205,7 +204,6 @@ function draw() {
   }
   ctx.stroke();
 
-  // highlighted edges for hovered/selected
   const focusId = state.selected || state.hovered;
   if (focusId && neighbors.has(focusId)) {
     const fn = nodeById.get(focusId);
@@ -221,7 +219,6 @@ function draw() {
     ctx.stroke();
   }
 
-  // nodes, dimmed if a focus exists and node not connected
   const dimOthers = !!focusId;
   for (const type of ["posts", "persons", "concepts"]) {
     if (!dimOthers) {
@@ -229,7 +226,6 @@ function draw() {
       ctx.fillStyle = TYPE_COLOR[type];
       ctx.fill(pathByType[type]);
     } else {
-      // draw dim pass then bright pass for connected nodes of this type
       ctx.globalAlpha = 0.16;
       ctx.fillStyle = TYPE_COLOR[type];
       ctx.fill(pathByType[type]);
@@ -239,15 +235,6 @@ function draw() {
 
   if (dimOthers) {
     const fset = neighbors.get(focusId) || new Set();
-    ctx.beginPath();
-    for (const id of [focusId, ...fset]) {
-      if (!state.visible.has(id)) continue;
-      const n = nodeById.get(id);
-      const r = nodeRadius(n);
-      ctx.moveTo(n.x + r, n.y);
-      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
-    }
-    // fill per-node color (group by type for correctness)
     for (const type of ["posts", "persons", "concepts"]) {
       ctx.beginPath();
       for (const id of [focusId, ...fset]) {
@@ -261,7 +248,6 @@ function draw() {
       ctx.fillStyle = TYPE_COLOR[type];
       ctx.fill();
     }
-    // ring around the exact focus node
     const fn2 = nodeById.get(focusId);
     if (fn2) {
       ctx.beginPath();
@@ -272,8 +258,7 @@ function draw() {
     }
   }
 
-  // labels
-  const showAllLabelThreshold = 1.4; // zoom scale beyond which most labels show
+  const showAllLabelThreshold = 1.4;
   ctx.font = `${11 / transform.k}px "IBM Plex Mono", monospace`;
   ctx.textBaseline = "middle";
   const labelSet = new Set();
@@ -626,7 +611,12 @@ async function main() {
   await loadData();
   buildGraphStructures();
 
+  // Показать блок графа ДО замера размеров холста (экран загрузки всё ещё
+  // поверх него, так что визуально ничего не меняется) — иначе canvas
+  // получает нулевой размер и весь граф рисуется невидимым.
+  document.getElementById("app").hidden = false;
   resizeCanvas();
+
   await runSimulation();
 
   recomputeVisible();
@@ -641,7 +631,6 @@ async function main() {
   document.getElementById("boot").style.opacity = "0";
   document.getElementById("boot").style.transition = "opacity .4s ease";
   setTimeout(() => { document.getElementById("boot").hidden = true; }, 400);
-  document.getElementById("app").hidden = false;
 
   ensureLoop();
 }
