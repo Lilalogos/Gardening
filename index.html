@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сад «Цифровой геноцид» — граф заметок</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="boot">
+  <div id="boot-card">
+    <div class="boot-title">Сад «Цифровой геноцид»</div>
+    <div class="boot-sub" id="boot-status">загружаю каталог…</div>
+    <div class="boot-bar"><div class="boot-bar-fill" id="boot-fill"></div></div>
+  </div>
+</div>
+
+<div id="app" hidden>
+
+  <header id="topbar">
+    <div class="tb-left">
+      <div class="tb-mark">СЦГ</div>
+      <div class="tb-title">
+        <span class="tb-title-main">Сад «Цифровой геноцид»</span>
+        <span class="tb-title-sub" id="tb-counts">— · — · —</span>
+      </div>
+    </div>
+
+    <div class="tb-search">
+      <input id="search-input" type="text" placeholder="Найти заметку…" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+
+    <div class="tb-right">
+      <button class="tb-btn" id="focus-toggle" title="Показать/скрыть все связи">Связи: тускло</button>
+      <button class="tb-btn" id="filters-toggle">Фильтры</button>
+    </div>
+  </header>
+
+  <div id="filters-panel" hidden>
+    <div class="fp-group">
+      <div class="fp-label">Тип заметки</div>
+      <label class="chip chip-posts"><input type="checkbox" data-type="posts" checked><span>Посты</span><b id="cnt-posts"></b></label>
+      <label class="chip chip-concepts"><input type="checkbox" data-type="concepts" checked><span>Концепты</span><b id="cnt-concepts"></b></label>
+      <label class="chip chip-persons"><input type="checkbox" data-type="persons" checked><span>Персоны</span><b id="cnt-persons"></b></label>
+    </div>
+    <div class="fp-group">
+      <div class="fp-label">Год публикации (посты)</div>
+      <div class="fp-range">
+        <input type="range" id="year-from" step="1">
+        <input type="range" id="year-to" step="1">
+      </div>
+      <div class="fp-range-labels"><span id="year-from-lbl"></span>–<span id="year-to-lbl"></span></div>
+    </div>
+    <div class="fp-group">
+      <div class="fp-label">Мин. число связей</div>
+      <input type="range" id="deg-min" min="0" max="20" step="1" value="0">
+      <div class="fp-range-labels"><span id="deg-min-lbl">0</span>+</div>
+    </div>
+    <button class="tb-btn" id="filters-reset">Сбросить</button>
+  </div>
+
+  <main id="stage">
+    <canvas id="graph-canvas"></canvas>
+    <div id="hover-tip" hidden></div>
+    <div id="legend">
+      <div class="legend-row"><i class="dot dot-concepts"></i>концепт</div>
+      <div class="legend-row"><i class="dot dot-persons"></i>персона</div>
+      <div class="legend-row"><i class="dot dot-posts"></i>пост</div>
+      <div class="legend-row legend-note">размер узла ~ число связей</div>
+    </div>
+    <div id="zoom-controls">
+      <button id="zoom-in" title="Приблизить">+</button>
+      <button id="zoom-out" title="Отдалить">–</button>
+      <button id="zoom-reset" title="Сбросить вид">⤢</button>
+    </div>
+  </main>
+
+  <aside id="panel">
+    <div class="panel-card">
+      <button id="panel-close" title="Закрыть">×</button>
+      <div class="panel-stamp" id="panel-stamp">—</div>
+      <div class="panel-eyebrow" id="panel-eyebrow">—</div>
+      <h1 id="panel-title">—</h1>
+      <div class="panel-meta" id="panel-meta"></div>
+      <div class="panel-body" id="panel-body"></div>
+
+      <div class="panel-section" id="panel-links-section" hidden>
+        <div class="panel-section-title">Исходящие связи</div>
+        <div class="panel-linklist" id="panel-links"></div>
+      </div>
+      <div class="panel-section" id="panel-backlinks-section" hidden>
+        <div class="panel-section-title">Ссылаются сюда</div>
+        <div class="panel-linklist" id="panel-backlinks"></div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
